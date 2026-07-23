@@ -6,8 +6,8 @@ public record LoginResponse(string Token, string Username);
 public record BrandDto(int Id, string NameEn, string NameAr, string Slug);
 public record BrandUpsertDto(string NameEn, string NameAr);
 
-public record CategoryDto(int Id, string NameEn, string NameAr, string Slug);
-public record CategoryUpsertDto(string NameEn, string NameAr);
+public record CategoryDto(int Id, string NameEn, string NameAr, string Slug, string? ImageUrl);
+public record CategoryUpsertDto(string NameEn, string NameAr, string? ImageUrl);
 
 public record ProductListItemDto(
     int Id,

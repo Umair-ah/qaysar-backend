@@ -20,7 +20,7 @@ public class R2StorageService : IStorageService
         _opts = opts.Value;
     }
 
-    public async Task<string> UploadAsync(Stream stream, string fileName, string contentType)
+    public async Task<string> UploadAsync(Stream stream, string fileName, string contentType, string folder = "uploads")
     {
         if (string.IsNullOrWhiteSpace(_opts.AccountId) ||
             string.IsNullOrWhiteSpace(_opts.AccessKey) ||
@@ -39,7 +39,8 @@ public class R2StorageService : IStorageService
         using var client = new AmazonS3Client(_opts.AccessKey, _opts.SecretKey, config);
 
         var ext = Path.GetExtension(fileName);
-        var key = $"products/{Guid.NewGuid():N}{ext}";
+        var safeFolder = string.IsNullOrWhiteSpace(folder) ? "uploads" : folder.Trim('/');
+        var key = $"{safeFolder}/{Guid.NewGuid():N}{ext}";
 
         var req = new PutObjectRequest
         {

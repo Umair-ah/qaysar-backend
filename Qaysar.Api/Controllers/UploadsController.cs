@@ -19,15 +19,18 @@ public class UploadsController : ControllerBase
     /// </summary>
     [HttpPost("image")]
     [RequestSizeLimit(10_000_000)]
-    public async Task<ActionResult<UploadResponse>> UploadImage(IFormFile file)
+    public async Task<ActionResult<UploadResponse>> UploadImage(IFormFile file, [FromForm] string? folder = null)
     {
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "File is required." });
 
+        var allowedFolders = new[] { "products", "categories" };
+        var targetFolder = allowedFolders.Contains(folder) ? folder! : "uploads";
+
         try
         {
             using var stream = file.OpenReadStream();
-            var url = await _storage.UploadAsync(stream, file.FileName, file.ContentType);
+            var url = await _storage.UploadAsync(stream, file.FileName, file.ContentType, targetFolder);
             return Ok(new UploadResponse(url));
         }
         catch (InvalidOperationException ex)

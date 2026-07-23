@@ -131,6 +131,6 @@ public class ProductService : IProductService
         p.Id, p.NameEn, p.NameAr, p.Sku, p.DescriptionEn, p.DescriptionAr,
         p.ImageUrl, p.InStock, p.IsVisible,
         new BrandDto(p.Brand!.Id, p.Brand.NameEn, p.Brand.NameAr, p.Brand.Slug),
-        p.ProductCategories.Select(pc => new CategoryDto(pc.Category!.Id, pc.Category.NameEn, pc.Category.NameAr, pc.Category.Slug)).ToList()
+        p.ProductCategories.Select(pc => new CategoryDto(pc.Category!.Id, pc.Category.NameEn, pc.Category.NameAr, pc.Category.Slug, pc.Category.ImageUrl)).ToList()
     );
 }
