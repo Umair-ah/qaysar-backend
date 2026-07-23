@@ -1,0 +1,53 @@
+namespace Qaysar.Api.DTOs;
+
+public record LoginRequest(string Username, string Password);
+public record LoginResponse(string Token, string Username);
+
+public record BrandDto(int Id, string NameEn, string NameAr, string Slug);
+public record BrandUpsertDto(string NameEn, string NameAr);
+
+public record CategoryDto(int Id, string NameEn, string NameAr, string Slug);
+public record CategoryUpsertDto(string NameEn, string NameAr);
+
+public record ProductListItemDto(
+    int Id,
+    string NameEn,
+    string NameAr,
+    string Sku,
+    string? ImageUrl,
+    bool InStock,
+    string BrandNameEn,
+    string BrandNameAr
+);
+
+public record ProductDetailDto(
+    int Id,
+    string NameEn,
+    string NameAr,
+    string Sku,
+    string DescriptionEn,
+    string DescriptionAr,
+    string? ImageUrl,
+    bool InStock,
+    bool IsVisible,
+    BrandDto Brand,
+    List<CategoryDto> Categories
+);
+
+public class ProductUpsertDto
+{
+    public string NameEn { get; set; } = "";
+    public string NameAr { get; set; } = "";
+    public string Sku { get; set; } = "";
+    public string DescriptionEn { get; set; } = "";
+    public string DescriptionAr { get; set; } = "";
+    public string? ImageUrl { get; set; }
+    public bool InStock { get; set; } = true;
+    public bool IsVisible { get; set; } = true;
+    public int BrandId { get; set; }
+    public List<int> CategoryIds { get; set; } = new();
+}
+
+public record PagedResult<T>(IEnumerable<T> Items, int Total, int Page, int PageSize);
+
+public record UploadResponse(string Url);
