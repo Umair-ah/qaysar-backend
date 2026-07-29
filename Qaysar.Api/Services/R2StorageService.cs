@@ -58,4 +58,34 @@ public class R2StorageService : IStorageService
 
         return $"{baseUrl}/{key}";
     }
+
+    public async Task DeleteAsync(string url)
+    {
+        if (string.IsNullOrWhiteSpace(_opts.AccountId) ||
+            string.IsNullOrWhiteSpace(_opts.AccessKey) ||
+            string.IsNullOrWhiteSpace(_opts.SecretKey) ||
+            string.IsNullOrWhiteSpace(_opts.Bucket))
+        {
+            throw new InvalidOperationException(
+                "R2 storage is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY, R2_SECRET_KEY, R2_BUCKET in .env");
+        }
+
+        var baseUrl = string.IsNullOrWhiteSpace(_opts.PublicBaseUrl)
+            ? $"https://{_opts.Bucket}.{_opts.AccountId}.r2.cloudflarestorage.com"
+            : _opts.PublicBaseUrl.TrimEnd('/');
+
+        // Not an object this service manages (e.g. a placeholder fallback URL) — nothing to delete.
+        if (!url.StartsWith(baseUrl + "/", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        var key = url[(baseUrl.Length + 1)..];
+
+        var config = new AmazonS3Config
+        {
+            ServiceURL = $"https://{_opts.AccountId}.r2.cloudflarestorage.com",
+            ForcePathStyle = true,
+        };
+        using var client = new AmazonS3Client(_opts.AccessKey, _opts.SecretKey, config);
+        await client.DeleteObjectAsync(_opts.Bucket, key);
+    }
 }

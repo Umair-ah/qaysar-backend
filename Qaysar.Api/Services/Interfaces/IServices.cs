@@ -40,4 +40,5 @@ public interface IProductService
 public interface IStorageService
 {
     Task<string> UploadAsync(Stream stream, string fileName, string contentType, string folder = "uploads");
+    Task DeleteAsync(string url);
 }

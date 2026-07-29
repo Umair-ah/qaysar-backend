@@ -27,7 +27,7 @@ public record ProductDetailDto(
     string Sku,
     string DescriptionEn,
     string DescriptionAr,
-    string? ImageUrl,
+    List<string> ImageUrls,
     bool InStock,
     bool IsVisible,
     BrandDto Brand,
@@ -41,7 +41,7 @@ public class ProductUpsertDto
     public string Sku { get; set; } = "";
     public string DescriptionEn { get; set; } = "";
     public string DescriptionAr { get; set; } = "";
-    public string? ImageUrl { get; set; }
+    public List<string> ImageUrls { get; set; } = new();
     public bool InStock { get; set; } = true;
     public bool IsVisible { get; set; } = true;
     public int BrandId { get; set; }

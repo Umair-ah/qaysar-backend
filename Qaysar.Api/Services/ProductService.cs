@@ -17,7 +17,7 @@ public class ProductService : IProductService
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 100);
 
-        var q = _db.Products.AsNoTracking().Include(p => p.Brand).AsQueryable();
+        var q = _db.Products.AsNoTracking().Include(p => p.Brand).Include(p => p.Images).AsQueryable();
 
         if (onlyVisible) q = q.Where(p => p.IsVisible);
         if (inStock.HasValue) q = q.Where(p => p.InStock == inStock.Value);
@@ -41,8 +41,9 @@ public class ProductService : IProductService
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(p => new ProductListItemDto(
-                p.Id, p.NameEn, p.NameAr, p.Sku, p.ImageUrl, p.InStock,
-                p.Brand!.NameEn, p.Brand!.NameAr))
+                p.Id, p.NameEn, p.NameAr, p.Sku,
+                p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault(),
+                p.InStock, p.Brand!.NameEn, p.Brand!.NameAr))
             .ToListAsync();
 
         return new PagedResult<ProductListItemDto>(items, total, page, pageSize);
@@ -53,6 +54,7 @@ public class ProductService : IProductService
         var q = _db.Products.AsNoTracking()
             .Include(p => p.Brand)
             .Include(p => p.ProductCategories).ThenInclude(pc => pc.Category)
+            .Include(p => p.Images)
             .AsQueryable();
         if (onlyVisible) q = q.Where(p => p.IsVisible);
 
@@ -74,7 +76,6 @@ public class ProductService : IProductService
             Sku = dto.Sku,
             DescriptionEn = dto.DescriptionEn,
             DescriptionAr = dto.DescriptionAr,
-            ImageUrl = dto.ImageUrl,
             InStock = dto.InStock,
             IsVisible = dto.IsVisible,
             BrandId = dto.BrandId,
@@ -82,6 +83,9 @@ public class ProductService : IProductService
 
         foreach (var cid in dto.CategoryIds.Distinct())
             product.ProductCategories.Add(new ProductCategory { CategoryId = cid });
+
+        for (var i = 0; i < dto.ImageUrls.Count; i++)
+            product.Images.Add(new ProductImage { Url = dto.ImageUrls[i], SortOrder = i });
 
         _db.Products.Add(product);
         await _db.SaveChangesAsync();
@@ -96,6 +100,7 @@ public class ProductService : IProductService
 
         var product = await _db.Products
             .Include(p => p.ProductCategories)
+            .Include(p => p.Images)
             .FirstOrDefaultAsync(p => p.Id == id);
         if (product is null) return null;
 
@@ -104,7 +109,6 @@ public class ProductService : IProductService
         product.Sku = dto.Sku;
         product.DescriptionEn = dto.DescriptionEn;
         product.DescriptionAr = dto.DescriptionAr;
-        product.ImageUrl = dto.ImageUrl;
         product.InStock = dto.InStock;
         product.IsVisible = dto.IsVisible;
         product.BrandId = dto.BrandId;
@@ -113,6 +117,10 @@ public class ProductService : IProductService
         product.ProductCategories.Clear();
         foreach (var cid in dto.CategoryIds.Distinct())
             product.ProductCategories.Add(new ProductCategory { ProductId = id, CategoryId = cid });
+
+        product.Images.Clear();
+        for (var i = 0; i < dto.ImageUrls.Count; i++)
+            product.Images.Add(new ProductImage { ProductId = id, Url = dto.ImageUrls[i], SortOrder = i });
 
         await _db.SaveChangesAsync();
         return await GetByIdAsync(id, false);
@@ -129,7 +137,8 @@ public class ProductService : IProductService
 
     private static ProductDetailDto Map(Product p) => new(
         p.Id, p.NameEn, p.NameAr, p.Sku, p.DescriptionEn, p.DescriptionAr,
-        p.ImageUrl, p.InStock, p.IsVisible,
+        p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).ToList(),
+        p.InStock, p.IsVisible,
         new BrandDto(p.Brand!.Id, p.Brand.NameEn, p.Brand.NameAr, p.Brand.Slug),
         p.ProductCategories.Select(pc => new CategoryDto(pc.Category!.Id, pc.Category.NameEn, pc.Category.NameAr, pc.Category.Slug, pc.Category.ImageUrl)).ToList()
     );

@@ -38,4 +38,24 @@ public class UploadsController : ControllerBase
             return StatusCode(503, new { message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Deletes an image previously uploaded to Cloudflare R2, given its public URL.
+    /// </summary>
+    [HttpDelete("image")]
+    public async Task<IActionResult> DeleteImage([FromQuery] string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return BadRequest(new { message = "url is required." });
+
+        try
+        {
+            await _storage.DeleteAsync(url);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(503, new { message = ex.Message });
+        }
+    }
 }
