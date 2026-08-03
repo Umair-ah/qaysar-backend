@@ -16,9 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Bind config from env
 builder.Configuration.AddEnvironmentVariables();
 
-var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION")
+var connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION")
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Server=localhost;Database=QaysarDb;Trusted_Connection=True;TrustServerCertificate=True";
+    ?? "Host=localhost;Port=5433;Database=QaysarDb;Username=postgres;Password=umair";
 
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_KEY_AT_LEAST_32_CHARS!!";
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "qaysar-api";
@@ -40,7 +40,7 @@ builder.Services.Configure<R2Options>(o =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlServer(connectionString));
+    opt.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
