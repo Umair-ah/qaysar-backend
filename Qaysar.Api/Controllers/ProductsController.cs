@@ -10,7 +10,15 @@ namespace Qaysar.Api.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _svc;
-    public ProductsController(IProductService svc) => _svc = svc;
+    private readonly IProductExportService _exportSvc;
+    private readonly IProductImportService _importSvc;
+
+    public ProductsController(IProductService svc, IProductExportService exportSvc, IProductImportService importSvc)
+    {
+        _svc = svc;
+        _exportSvc = exportSvc;
+        _importSvc = importSvc;
+    }
 
     /// <summary>
     /// Public listing (only visible products). Paginated for infinite scroll.
@@ -92,4 +100,46 @@ public class ProductsController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
         => await _svc.DeleteAsync(id) ? NoContent() : NotFound();
+
+    // ---- Bulk import / export ----
+
+    /// <summary>
+    /// Exports every product to an .xlsx workbook. Image columns (Image1..Image10) contain
+    /// filenames only — never URLs, never embedded images — matched to Images.zip on re-import.
+    /// </summary>
+    [Authorize]
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(CancellationToken ct)
+    {
+        var bytes = await _exportSvc.ExportAsync(ct);
+        var fileName = $"products-export-{DateTime.UtcNow:yyyyMMdd-HHmmss}.xlsx";
+        return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+    }
+
+    /// <summary>
+    /// Bulk-updates existing products from Products.xlsx, optionally replacing their images from
+    /// Images.zip. All-or-nothing: if any row fails validation, nothing is written or uploaded —
+    /// every validation error is returned together so the sheet can be fixed and re-submitted.
+    /// </summary>
+    [Authorize]
+    [HttpPost("import")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(500_000_000)]
+    public async Task<ActionResult<BulkImportResultDto>> Import(IFormFile excel, IFormFile? imagesZip, CancellationToken ct)
+    {
+        if (excel is null || excel.Length == 0)
+            return BadRequest(new { message = "An Excel (.xlsx) file is required." });
+
+        await using var excelStream = excel.OpenReadStream();
+        Stream? zipStream = imagesZip is { Length: > 0 } ? imagesZip.OpenReadStream() : null;
+        try
+        {
+            var result = await _importSvc.ImportAsync(excelStream, zipStream, ct);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+        finally
+        {
+            if (zipStream is not null) await zipStream.DisposeAsync();
+        }
+    }
 }

@@ -124,3 +124,15 @@ public class QuotationPricesUpdateDto
 {
     public List<QuotationItemPriceDto> Items { get; set; } = new();
 }
+
+// ---- Bulk product import/export ----
+
+public record ImportValidationErrorDto(int RowNumber, int? ProductId, string Message);
+
+public record BulkImportResultDto(
+    bool Success,
+    int TotalRows,
+    int CreatedCount,
+    int UpdatedCount,
+    List<ImportValidationErrorDto> Errors
+);

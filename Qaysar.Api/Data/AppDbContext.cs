@@ -64,6 +64,8 @@ public class AppDbContext : DbContext
         mb.Entity<ProductImage>(e =>
         {
             e.Property(pi => pi.Url).HasMaxLength(1000).IsRequired();
+            e.Property(pi => pi.OriginalFileName).HasMaxLength(260).IsRequired().HasDefaultValue("");
+            e.Property(pi => pi.StoredFileName).HasMaxLength(260).IsRequired().HasDefaultValue("");
             e.HasIndex(pi => new { pi.ProductId, pi.SortOrder });
             e.HasOne(pi => pi.Product)
                 .WithMany(p => p.Images)

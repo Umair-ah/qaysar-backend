@@ -20,7 +20,7 @@ public class R2StorageService : IStorageService
         _opts = opts.Value;
     }
 
-    public async Task<string> UploadAsync(Stream stream, string fileName, string contentType, string folder = "uploads")
+    public async Task<string> UploadAsync(Stream stream, string fileName, string contentType, string folder = "uploads", CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(_opts.AccountId) ||
             string.IsNullOrWhiteSpace(_opts.AccessKey) ||
@@ -50,7 +50,7 @@ public class R2StorageService : IStorageService
             ContentType = contentType,
             DisablePayloadSigning = true,
         };
-        await client.PutObjectAsync(req);
+        await client.PutObjectAsync(req, ct);
 
         var baseUrl = string.IsNullOrWhiteSpace(_opts.PublicBaseUrl)
             ? $"https://{_opts.Bucket}.{_opts.AccountId}.r2.cloudflarestorage.com"
@@ -59,7 +59,7 @@ public class R2StorageService : IStorageService
         return $"{baseUrl}/{key}";
     }
 
-    public async Task DeleteAsync(string url)
+    public async Task DeleteAsync(string url, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(_opts.AccountId) ||
             string.IsNullOrWhiteSpace(_opts.AccessKey) ||
@@ -86,6 +86,6 @@ public class R2StorageService : IStorageService
             ForcePathStyle = true,
         };
         using var client = new AmazonS3Client(_opts.AccessKey, _opts.SecretKey, config);
-        await client.DeleteObjectAsync(_opts.Bucket, key);
+        await client.DeleteObjectAsync(_opts.Bucket, key, ct);
     }
 }

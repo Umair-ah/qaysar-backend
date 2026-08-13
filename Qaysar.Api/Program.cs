@@ -48,6 +48,9 @@ builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IQuotationService, QuotationService>();
 builder.Services.AddScoped<IStorageService, R2StorageService>();
+builder.Services.AddScoped<IZipImageService, ZipImageService>();
+builder.Services.AddScoped<IProductExportService, ProductExportService>();
+builder.Services.AddScoped<IProductImportService, ProductImportService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -72,6 +75,13 @@ builder.Services.AddCors(options =>
         .AllowAnyOrigin()
         .AllowAnyHeader()
         .AllowAnyMethod());
+});
+
+// Bulk product import can include a large ZIP of images — raise the multipart form limit
+// well past the ASP.NET Core default (128MB) to comfortably support thousands of products.
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(o =>
+{
+    o.MultipartBodyLengthLimit = 500_000_000;
 });
 
 builder.Services.AddControllers();

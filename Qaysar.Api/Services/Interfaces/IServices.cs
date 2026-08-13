@@ -1,4 +1,5 @@
 using Qaysar.Api.DTOs;
+using Qaysar.Api.Services;
 
 namespace Qaysar.Api.Services.Interfaces;
 
@@ -47,8 +48,34 @@ public interface IQuotationService
     Task<QuotationDetailDto?> UpdatePricesAsync(int id, QuotationPricesUpdateDto dto);
 }
 
+public interface IZipImageService
+{
+    /// <summary>
+    /// Opens a ZIP stream and indexes its entries by filename (case-insensitive), validating
+    /// extensions and rejecting duplicate filenames. Errors are appended to <paramref name="errors"/>
+    /// rather than thrown, so batch validation can continue collecting problems.
+    /// Caller owns disposal of the returned index (and, transitively, the underlying archive).
+    /// </summary>
+    ZipImageIndex OpenAndIndex(Stream zipStream, List<string> errors);
+}
+
 public interface IStorageService
 {
-    Task<string> UploadAsync(Stream stream, string fileName, string contentType, string folder = "uploads");
-    Task DeleteAsync(string url);
+    Task<string> UploadAsync(Stream stream, string fileName, string contentType, string folder = "uploads", CancellationToken ct = default);
+    Task DeleteAsync(string url, CancellationToken ct = default);
+}
+
+public interface IProductExportService
+{
+    /// <summary>Builds an .xlsx workbook of every product (filenames only for images — never URLs).</summary>
+    Task<byte[]> ExportAsync(CancellationToken ct = default);
+}
+
+public interface IProductImportService
+{
+    /// <summary>
+    /// Bulk-updates existing products from an Excel workbook, optionally replacing their images
+    /// from a ZIP of image files. All-or-nothing: if validation fails, nothing is written or uploaded.
+    /// </summary>
+    Task<BulkImportResultDto> ImportAsync(Stream excelStream, Stream? zipStream, CancellationToken ct = default);
 }
