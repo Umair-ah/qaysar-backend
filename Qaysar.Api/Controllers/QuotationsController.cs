@@ -63,4 +63,12 @@ public class QuotationsController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [Authorize]
+    [HttpPut("{id:int}/prices")]
+    public async Task<ActionResult<QuotationDetailDto>> UpdatePrices(int id, [FromBody] QuotationPricesUpdateDto dto)
+    {
+        var q = await _svc.UpdatePricesAsync(id, dto);
+        return q is null ? NotFound() : Ok(q);
+    }
 }

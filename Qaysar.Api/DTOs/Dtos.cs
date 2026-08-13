@@ -88,7 +88,20 @@ public class QuotationCreateDto
 
 public record QuotationListItemDto(int Id, string Email, string ContactNumber, DateTime CreatedAt, string Status);
 
-public record QuotationItemDto(int ProductId, string ProductNameEn, string ProductNameAr, string Sku, string? ImageUrl, int Quantity);
+public record QuotationItemDto(
+    int Id,
+    int ProductId,
+    string ProductNameEn,
+    string ProductNameAr,
+    string Sku,
+    string? ImageUrl,
+    int Quantity,
+    decimal CostPrice,
+    decimal LowPrice,
+    decimal MediumPrice,
+    decimal HighPrice,
+    decimal? UnitPrice
+);
 
 public record QuotationDetailDto(
     int Id,
@@ -103,4 +116,11 @@ public record QuotationDetailDto(
 public class QuotationStatusUpdateDto
 {
     public string Status { get; set; } = "";
+}
+
+public record QuotationItemPriceDto(int Id, decimal? UnitPrice);
+
+public class QuotationPricesUpdateDto
+{
+    public List<QuotationItemPriceDto> Items { get; set; } = new();
 }

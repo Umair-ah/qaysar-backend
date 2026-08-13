@@ -80,15 +80,39 @@ public class QuotationService : IQuotationService
         return await GetByIdAsync(id);
     }
 
+    public async Task<QuotationDetailDto?> UpdatePricesAsync(int id, QuotationPricesUpdateDto dto)
+    {
+        var quotation = await _db.Quotations
+            .Include(x => x.QuotationProducts)
+            .FirstOrDefaultAsync(x => x.Id == id);
+        if (quotation is null) return null;
+
+        var itemsById = quotation.QuotationProducts.ToDictionary(qp => qp.Id);
+        foreach (var item in dto.Items ?? new())
+        {
+            if (itemsById.TryGetValue(item.Id, out var qp))
+                qp.UnitPrice = item.UnitPrice;
+        }
+
+        await _db.SaveChangesAsync();
+        return await GetByIdAsync(id);
+    }
+
     private static QuotationDetailDto Map(Quotation q) => new(
         q.Id, q.Email, q.ContactNumber, q.AdditionalDetails, q.CreatedAt, q.Status.ToString(),
         q.QuotationProducts.Select(qp => new QuotationItemDto(
+            qp.Id,
             qp.ProductId,
             qp.Product!.NameEn,
             qp.Product.NameAr,
             qp.Product.Sku,
             qp.Product.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault(),
-            qp.Quantity
+            qp.Quantity,
+            qp.Product.CostPrice,
+            qp.Product.LowPrice,
+            qp.Product.MediumPrice,
+            qp.Product.HighPrice,
+            qp.UnitPrice
         )).ToList()
     );
 }

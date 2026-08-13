@@ -44,6 +44,7 @@ public interface IQuotationService
     Task<PagedResult<QuotationListItemDto>> GetPagedAsync(int page, int pageSize);
     Task<QuotationDetailDto?> GetByIdAsync(int id);
     Task<QuotationDetailDto?> UpdateStatusAsync(int id, string status);
+    Task<QuotationDetailDto?> UpdatePricesAsync(int id, QuotationPricesUpdateDto dto);
 }
 
 public interface IStorageService
