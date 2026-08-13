@@ -38,6 +38,14 @@ public interface IProductService
     Task<bool> DeleteAsync(int id);
 }
 
+public interface IQuotationService
+{
+    Task<QuotationDetailDto> CreateAsync(QuotationCreateDto dto);
+    Task<PagedResult<QuotationListItemDto>> GetPagedAsync(int page, int pageSize);
+    Task<QuotationDetailDto?> GetByIdAsync(int id);
+    Task<QuotationDetailDto?> UpdateStatusAsync(int id, string status);
+}
+
 public interface IStorageService
 {
     Task<string> UploadAsync(Stream stream, string fileName, string contentType, string folder = "uploads");

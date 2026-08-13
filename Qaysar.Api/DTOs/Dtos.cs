@@ -75,3 +75,32 @@ public class ProductUpsertDto
 public record PagedResult<T>(IEnumerable<T> Items, int Total, int Page, int PageSize);
 
 public record UploadResponse(string Url);
+
+public record QuotationProductCreateDto(int ProductId, int Quantity);
+
+public class QuotationCreateDto
+{
+    public string Email { get; set; } = "";
+    public string ContactNumber { get; set; } = "";
+    public string? AdditionalDetails { get; set; }
+    public List<QuotationProductCreateDto> Items { get; set; } = new();
+}
+
+public record QuotationListItemDto(int Id, string Email, string ContactNumber, DateTime CreatedAt, string Status);
+
+public record QuotationItemDto(int ProductId, string ProductNameEn, string ProductNameAr, string Sku, string? ImageUrl, int Quantity);
+
+public record QuotationDetailDto(
+    int Id,
+    string Email,
+    string ContactNumber,
+    string? AdditionalDetails,
+    DateTime CreatedAt,
+    string Status,
+    List<QuotationItemDto> Items
+);
+
+public class QuotationStatusUpdateDto
+{
+    public string Status { get; set; } = "";
+}

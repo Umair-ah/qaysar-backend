@@ -13,6 +13,8 @@ public class AppDbContext : DbContext
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
+    public DbSet<Quotation> Quotations => Set<Quotation>();
+    public DbSet<QuotationProduct> QuotationProducts => Set<QuotationProduct>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
@@ -73,6 +75,27 @@ public class AppDbContext : DbContext
         {
             e.Property(u => u.Username).HasMaxLength(100).IsRequired();
             e.HasIndex(u => u.Username).IsUnique();
+        });
+
+        mb.Entity<Quotation>(e =>
+        {
+            e.Property(q => q.Email).HasMaxLength(300).IsRequired();
+            e.Property(q => q.ContactNumber).HasMaxLength(50).IsRequired();
+            e.Property(q => q.AdditionalDetails).HasMaxLength(2000);
+            e.Property(q => q.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
+            e.HasIndex(q => q.CreatedAt);
+        });
+
+        mb.Entity<QuotationProduct>(e =>
+        {
+            e.HasOne(qp => qp.Quotation)
+                .WithMany(q => q.QuotationProducts)
+                .HasForeignKey(qp => qp.QuotationId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(qp => qp.Product)
+                .WithMany()
+                .HasForeignKey(qp => qp.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
