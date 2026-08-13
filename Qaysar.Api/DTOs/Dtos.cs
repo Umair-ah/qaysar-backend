@@ -30,6 +30,26 @@ public record ProductDetailDto(
     List<string> ImageUrls,
     bool InStock,
     bool IsVisible,
+    decimal CostPrice,
+    decimal LowPrice,
+    decimal MediumPrice,
+    decimal HighPrice,
+    BrandDto Brand,
+    List<CategoryDto> Categories
+);
+
+// Customer-facing product detail — omits pricing fields (CostPrice/LowPrice/MediumPrice/HighPrice)
+// since those are internal-only and must not leak to the storefront API response.
+public record ProductDetailCustomerDto(
+    int Id,
+    string NameEn,
+    string NameAr,
+    string Sku,
+    string DescriptionEn,
+    string DescriptionAr,
+    List<string> ImageUrls,
+    bool InStock,
+    bool IsVisible,
     BrandDto Brand,
     List<CategoryDto> Categories
 );
@@ -44,6 +64,10 @@ public class ProductUpsertDto
     public List<string> ImageUrls { get; set; } = new();
     public bool InStock { get; set; } = true;
     public bool IsVisible { get; set; } = true;
+    public decimal CostPrice { get; set; }
+    public decimal LowPrice { get; set; }
+    public decimal MediumPrice { get; set; }
+    public decimal HighPrice { get; set; }
     public int BrandId { get; set; }
     public List<int> CategoryIds { get; set; } = new();
 }

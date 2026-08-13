@@ -29,9 +29,9 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<ProductDetailDto>> Get(int id)
+    public async Task<ActionResult<ProductDetailCustomerDto>> Get(int id)
     {
-        var p = await _svc.GetByIdAsync(id, onlyVisible: true);
+        var p = await _svc.GetPublicByIdAsync(id);
         return p is null ? NotFound() : Ok(p);
     }
 

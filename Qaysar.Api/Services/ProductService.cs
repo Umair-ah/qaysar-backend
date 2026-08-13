@@ -62,6 +62,18 @@ public class ProductService : IProductService
         return p2 is null ? null : Map(p2);
     }
 
+    public async Task<ProductDetailCustomerDto?> GetPublicByIdAsync(int id)
+    {
+        var p = await _db.Products.AsNoTracking()
+            .Include(p => p.Brand)
+            .Include(p => p.ProductCategories).ThenInclude(pc => pc.Category)
+            .Include(p => p.Images)
+            .Where(p => p.IsVisible)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        return p is null ? null : MapCustomer(p);
+    }
+
     public async Task<ProductDetailDto> CreateAsync(ProductUpsertDto dto)
     {
         if (dto.CategoryIds is null || dto.CategoryIds.Count == 0)
@@ -78,6 +90,10 @@ public class ProductService : IProductService
             DescriptionAr = dto.DescriptionAr,
             InStock = dto.InStock,
             IsVisible = dto.IsVisible,
+            CostPrice = dto.CostPrice,
+            LowPrice = dto.LowPrice,
+            MediumPrice = dto.MediumPrice,
+            HighPrice = dto.HighPrice,
             BrandId = dto.BrandId,
         };
 
@@ -111,6 +127,10 @@ public class ProductService : IProductService
         product.DescriptionAr = dto.DescriptionAr;
         product.InStock = dto.InStock;
         product.IsVisible = dto.IsVisible;
+        product.CostPrice = dto.CostPrice;
+        product.LowPrice = dto.LowPrice;
+        product.MediumPrice = dto.MediumPrice;
+        product.HighPrice = dto.HighPrice;
         product.BrandId = dto.BrandId;
         product.UpdatedAt = DateTime.UtcNow;
 
@@ -136,6 +156,15 @@ public class ProductService : IProductService
     }
 
     private static ProductDetailDto Map(Product p) => new(
+        p.Id, p.NameEn, p.NameAr, p.Sku, p.DescriptionEn, p.DescriptionAr,
+        p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).ToList(),
+        p.InStock, p.IsVisible,
+        p.CostPrice, p.LowPrice, p.MediumPrice, p.HighPrice,
+        new BrandDto(p.Brand!.Id, p.Brand.NameEn, p.Brand.NameAr, p.Brand.Slug),
+        p.ProductCategories.Select(pc => new CategoryDto(pc.Category!.Id, pc.Category.NameEn, pc.Category.NameAr, pc.Category.Slug, pc.Category.ImageUrl)).ToList()
+    );
+
+    private static ProductDetailCustomerDto MapCustomer(Product p) => new(
         p.Id, p.NameEn, p.NameAr, p.Sku, p.DescriptionEn, p.DescriptionAr,
         p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).ToList(),
         p.InStock, p.IsVisible,

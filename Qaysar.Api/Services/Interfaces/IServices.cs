@@ -32,6 +32,7 @@ public interface IProductService
     Task<PagedResult<ProductListItemDto>> GetPagedAsync(
         int page, int pageSize, string? search, int? brandId, int? categoryId, bool onlyVisible, bool? inStock);
     Task<ProductDetailDto?> GetByIdAsync(int id, bool onlyVisible);
+    Task<ProductDetailCustomerDto?> GetPublicByIdAsync(int id);
     Task<ProductDetailDto> CreateAsync(ProductUpsertDto dto);
     Task<ProductDetailDto?> UpdateAsync(int id, ProductUpsertDto dto);
     Task<bool> DeleteAsync(int id);

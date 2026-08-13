@@ -11,6 +11,11 @@ public class Product
     public bool InStock { get; set; } = true;
     public bool IsVisible { get; set; } = true;
 
+    public decimal CostPrice { get; set; }
+    public decimal LowPrice { get; set; }
+    public decimal MediumPrice { get; set; }
+    public decimal HighPrice { get; set; }
+
     public int BrandId { get; set; }
     public Brand? Brand { get; set; }
 
