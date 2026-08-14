@@ -80,13 +80,14 @@ public record QuotationProductCreateDto(int ProductId, int Quantity);
 
 public class QuotationCreateDto
 {
+    public string Name { get; set; } = "";
     public string Email { get; set; } = "";
     public string ContactNumber { get; set; } = "";
     public string? AdditionalDetails { get; set; }
     public List<QuotationProductCreateDto> Items { get; set; } = new();
 }
 
-public record QuotationListItemDto(int Id, string Email, string ContactNumber, DateTime CreatedAt, string Status);
+public record QuotationListItemDto(int Id, string Name, string Email, string ContactNumber, DateTime CreatedAt, string Status);
 
 public record QuotationItemDto(
     int Id,
@@ -105,6 +106,7 @@ public record QuotationItemDto(
 
 public record QuotationDetailDto(
     int Id,
+    string Name,
     string Email,
     string ContactNumber,
     string? AdditionalDetails,
@@ -124,6 +126,27 @@ public class QuotationPricesUpdateDto
 {
     public List<QuotationItemPriceDto> Items { get; set; } = new();
 }
+
+// ---- Dashboard ----
+
+public record DashboardRevenuePointDto(DateTime Date, decimal Revenue);
+public record DashboardStatusCountDto(string Status, int Count);
+
+public record DashboardStatsDto(
+    decimal TotalRevenue,
+    decimal RevenueThisMonth,
+    decimal RevenueLastMonth,
+    decimal RevenueThisWeek,
+    int NewQuotationsToday,
+    int TotalQuotations,
+    int SuccessQuotations,
+    int PendingQuotations,
+    int FailedQuotations,
+    decimal ConversionRatePercent,
+    decimal AverageOrderValue,
+    List<DashboardRevenuePointDto> RevenueTrend,
+    List<DashboardStatusCountDto> StatusBreakdown
+);
 
 // ---- Bulk product import/export ----
 

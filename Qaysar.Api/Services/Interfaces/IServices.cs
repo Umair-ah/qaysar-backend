@@ -10,7 +10,7 @@ public interface IAuthService
 
 public interface IBrandService
 {
-    Task<List<BrandDto>> GetAllAsync();
+    Task<List<BrandDto>> GetAllAsync(string? search = null);
     Task<BrandDto?> GetByIdAsync(int id);
     Task<BrandDto?> GetBySlugAsync(string slug);
     Task<BrandDto> CreateAsync(BrandUpsertDto dto);
@@ -20,7 +20,7 @@ public interface IBrandService
 
 public interface ICategoryService
 {
-    Task<List<CategoryDto>> GetAllAsync();
+    Task<List<CategoryDto>> GetAllAsync(string? search = null);
     Task<CategoryDto?> GetByIdAsync(int id);
     Task<CategoryDto?> GetBySlugAsync(string slug);
     Task<CategoryDto> CreateAsync(CategoryUpsertDto dto);
@@ -42,7 +42,7 @@ public interface IProductService
 public interface IQuotationService
 {
     Task<QuotationDetailDto> CreateAsync(QuotationCreateDto dto);
-    Task<PagedResult<QuotationListItemDto>> GetPagedAsync(int page, int pageSize);
+    Task<PagedResult<QuotationListItemDto>> GetPagedAsync(int page, int pageSize, string? status);
     Task<QuotationDetailDto?> GetByIdAsync(int id);
     Task<QuotationDetailDto?> UpdateStatusAsync(int id, string status);
     Task<QuotationDetailDto?> UpdatePricesAsync(int id, QuotationPricesUpdateDto dto);
@@ -50,8 +50,15 @@ public interface IQuotationService
 
 public interface IQuotationPdfService
 {
-    /// <summary>Renders a client-ready quotation PDF (logo, itemized products, totals). Null if the quotation doesn't exist.</summary>
+    /// <summary>Renders a client-ready quotation PDF (logo, itemized products, totals). Null if the quotation doesn't exist.
+    /// Throws <see cref="InvalidOperationException"/> if no item prices have been set yet.</summary>
     Task<byte[]?> GenerateAsync(int id, CancellationToken ct = default);
+}
+
+public interface IDashboardService
+{
+    /// <summary>Aggregates revenue (from Success quotations) and quotation-volume stats for the admin dashboard.</summary>
+    Task<DashboardStatsDto> GetStatsAsync();
 }
 
 public interface IZipImageService

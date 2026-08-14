@@ -13,8 +13,16 @@ public class CategoryService : ICategoryService
 
     private static CategoryDto ToDto(Category c) => new(c.Id, c.NameEn, c.NameAr, c.Slug, c.ImageUrl);
 
-    public async Task<List<CategoryDto>> GetAllAsync() =>
-        await _db.Categories.OrderBy(c => c.NameEn).Select(c => ToDto(c)).ToListAsync();
+    public async Task<List<CategoryDto>> GetAllAsync(string? search = null)
+    {
+        var q = _db.Categories.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim();
+            q = q.Where(c => EF.Functions.Like(c.NameEn, $"%{s}%") || EF.Functions.Like(c.NameAr, $"%{s}%"));
+        }
+        return await q.OrderBy(c => c.NameEn).Select(c => ToDto(c)).ToListAsync();
+    }
 
     public async Task<CategoryDto?> GetByIdAsync(int id)
     {

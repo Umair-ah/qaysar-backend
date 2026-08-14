@@ -50,6 +50,7 @@ builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IQuotationService, QuotationService>();
 builder.Services.AddScoped<IQuotationPdfService, QuotationPdfService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IStorageService, R2StorageService>();
 builder.Services.AddScoped<IZipImageService, ZipImageService>();
 builder.Services.AddScoped<IProductExportService, ProductExportService>();

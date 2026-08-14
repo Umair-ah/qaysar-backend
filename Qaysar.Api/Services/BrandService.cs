@@ -13,8 +13,16 @@ public class BrandService : IBrandService
 
     private static BrandDto ToDto(Brand b) => new(b.Id, b.NameEn, b.NameAr, b.Slug, b.ImageUrl);
 
-    public async Task<List<BrandDto>> GetAllAsync() =>
-        await _db.Brands.OrderBy(b => b.NameEn).Select(b => ToDto(b)).ToListAsync();
+    public async Task<List<BrandDto>> GetAllAsync(string? search = null)
+    {
+        var q = _db.Brands.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim();
+            q = q.Where(b => EF.Functions.Like(b.NameEn, $"%{s}%") || EF.Functions.Like(b.NameAr, $"%{s}%"));
+        }
+        return await q.OrderBy(b => b.NameEn).Select(b => ToDto(b)).ToListAsync();
+    }
 
     public async Task<BrandDto?> GetByIdAsync(int id)
     {

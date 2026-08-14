@@ -40,9 +40,10 @@ public class QuotationsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<PagedResult<QuotationListItemDto>>> GetAll(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20)
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? status = null)
     {
-        var res = await _svc.GetPagedAsync(page, pageSize);
+        var res = await _svc.GetPagedAsync(page, pageSize, status);
         return Ok(res);
     }
 
@@ -81,7 +82,14 @@ public class QuotationsController : ControllerBase
     [HttpGet("{id:int}/pdf")]
     public async Task<IActionResult> GetPdf(int id)
     {
-        var bytes = await _pdfSvc.GenerateAsync(id, HttpContext.RequestAborted);
-        return bytes is null ? NotFound() : File(bytes, "application/pdf", $"Quotation-{id:D5}.pdf");
+        try
+        {
+            var bytes = await _pdfSvc.GenerateAsync(id, HttpContext.RequestAborted);
+            return bytes is null ? NotFound() : File(bytes, "application/pdf", $"Quotation-{id:D5}.pdf");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

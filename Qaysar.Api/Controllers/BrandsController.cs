@@ -13,7 +13,7 @@ public class BrandsController : ControllerBase
     public BrandsController(IBrandService svc) => _svc = svc;
 
     [HttpGet]
-    public async Task<ActionResult<List<BrandDto>>> GetAll() => Ok(await _svc.GetAllAsync());
+    public async Task<ActionResult<List<BrandDto>>> GetAll([FromQuery] string? search = null) => Ok(await _svc.GetAllAsync(search));
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<BrandDto>> Get(int id)

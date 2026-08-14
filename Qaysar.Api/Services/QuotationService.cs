@@ -25,6 +25,7 @@ public class QuotationService : IQuotationService
 
         var quotation = new Quotation
         {
+            Name = dto.Name,
             Email = dto.Email,
             ContactNumber = dto.ContactNumber,
             AdditionalDetails = string.IsNullOrWhiteSpace(dto.AdditionalDetails) ? null : dto.AdditionalDetails.Trim(),
@@ -40,18 +41,22 @@ public class QuotationService : IQuotationService
         return (await GetByIdAsync(quotation.Id))!;
     }
 
-    public async Task<PagedResult<QuotationListItemDto>> GetPagedAsync(int page, int pageSize)
+    public async Task<PagedResult<QuotationListItemDto>> GetPagedAsync(int page, int pageSize, string? status)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 100);
 
-        var q = _db.Quotations.AsNoTracking().OrderByDescending(x => x.CreatedAt);
+        var query = _db.Quotations.AsNoTracking().AsQueryable();
+        if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<QuotationStatus>(status, out var parsedStatus))
+            query = query.Where(x => x.Status == parsedStatus);
+
+        var q = query.OrderByDescending(x => x.CreatedAt);
 
         var total = await q.CountAsync();
         var items = await q
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(x => new QuotationListItemDto(x.Id, x.Email, x.ContactNumber, x.CreatedAt, x.Status.ToString()))
+            .Select(x => new QuotationListItemDto(x.Id, x.Name, x.Email, x.ContactNumber, x.CreatedAt, x.Status.ToString()))
             .ToListAsync();
 
         return new PagedResult<QuotationListItemDto>(items, total, page, pageSize);
@@ -99,7 +104,7 @@ public class QuotationService : IQuotationService
     }
 
     private static QuotationDetailDto Map(Quotation q) => new(
-        q.Id, q.Email, q.ContactNumber, q.AdditionalDetails, q.CreatedAt, q.Status.ToString(),
+        q.Id, q.Name, q.Email, q.ContactNumber, q.AdditionalDetails, q.CreatedAt, q.Status.ToString(),
         q.QuotationProducts.Select(qp => new QuotationItemDto(
             qp.Id,
             qp.ProductId,

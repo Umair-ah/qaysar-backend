@@ -13,7 +13,7 @@ public class CategoriesController : ControllerBase
     public CategoriesController(ICategoryService svc) => _svc = svc;
 
     [HttpGet]
-    public async Task<ActionResult<List<CategoryDto>>> GetAll() => Ok(await _svc.GetAllAsync());
+    public async Task<ActionResult<List<CategoryDto>>> GetAll([FromQuery] string? search = null) => Ok(await _svc.GetAllAsync(search));
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<CategoryDto>> Get(int id)
