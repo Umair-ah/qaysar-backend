@@ -11,6 +11,8 @@ using Qaysar.Api.Services.Interfaces;
 
 Env.TraversePath().Load();
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Bind config from env
@@ -47,6 +49,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IQuotationService, QuotationService>();
+builder.Services.AddScoped<IQuotationPdfService, QuotationPdfService>();
 builder.Services.AddScoped<IStorageService, R2StorageService>();
 builder.Services.AddScoped<IZipImageService, ZipImageService>();
 builder.Services.AddScoped<IProductExportService, ProductExportService>();

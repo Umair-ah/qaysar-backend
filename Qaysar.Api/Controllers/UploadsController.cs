@@ -24,7 +24,7 @@ public class UploadsController : ControllerBase
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "File is required." });
 
-        var allowedFolders = new[] { "products", "categories" };
+        var allowedFolders = new[] { "products", "categories", "brands" };
         var targetFolder = allowedFolders.Contains(folder) ? folder! : "uploads";
 
         try

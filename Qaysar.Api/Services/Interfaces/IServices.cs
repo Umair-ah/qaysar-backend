@@ -48,6 +48,12 @@ public interface IQuotationService
     Task<QuotationDetailDto?> UpdatePricesAsync(int id, QuotationPricesUpdateDto dto);
 }
 
+public interface IQuotationPdfService
+{
+    /// <summary>Renders a client-ready quotation PDF (logo, itemized products, totals). Null if the quotation doesn't exist.</summary>
+    Task<byte[]?> GenerateAsync(int id, CancellationToken ct = default);
+}
+
 public interface IZipImageService
 {
     /// <summary>

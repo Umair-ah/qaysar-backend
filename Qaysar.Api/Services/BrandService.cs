@@ -11,7 +11,7 @@ public class BrandService : IBrandService
     private readonly AppDbContext _db;
     public BrandService(AppDbContext db) => _db = db;
 
-    private static BrandDto ToDto(Brand b) => new(b.Id, b.NameEn, b.NameAr, b.Slug);
+    private static BrandDto ToDto(Brand b) => new(b.Id, b.NameEn, b.NameAr, b.Slug, b.ImageUrl);
 
     public async Task<List<BrandDto>> GetAllAsync() =>
         await _db.Brands.OrderBy(b => b.NameEn).Select(b => ToDto(b)).ToListAsync();
@@ -31,7 +31,7 @@ public class BrandService : IBrandService
     public async Task<BrandDto> CreateAsync(BrandUpsertDto dto)
     {
         var slug = await UniqueSlug(SlugHelper.Slugify(dto.NameEn));
-        var brand = new Brand { NameEn = dto.NameEn, NameAr = dto.NameAr, Slug = slug };
+        var brand = new Brand { NameEn = dto.NameEn, NameAr = dto.NameAr, Slug = slug, ImageUrl = dto.ImageUrl };
         _db.Brands.Add(brand);
         await _db.SaveChangesAsync();
         return ToDto(brand);
@@ -43,6 +43,7 @@ public class BrandService : IBrandService
         if (b is null) return null;
         b.NameEn = dto.NameEn;
         b.NameAr = dto.NameAr;
+        b.ImageUrl = dto.ImageUrl;
         await _db.SaveChangesAsync();
         return ToDto(b);
     }

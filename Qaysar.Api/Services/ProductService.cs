@@ -160,7 +160,7 @@ public class ProductService : IProductService
         p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).ToList(),
         p.InStock, p.IsVisible,
         p.CostPrice, p.LowPrice, p.MediumPrice, p.HighPrice,
-        new BrandDto(p.Brand!.Id, p.Brand.NameEn, p.Brand.NameAr, p.Brand.Slug),
+        new BrandDto(p.Brand!.Id, p.Brand.NameEn, p.Brand.NameAr, p.Brand.Slug, p.Brand.ImageUrl),
         p.ProductCategories.Select(pc => new CategoryDto(pc.Category!.Id, pc.Category.NameEn, pc.Category.NameAr, pc.Category.Slug, pc.Category.ImageUrl)).ToList()
     );
 
@@ -168,7 +168,7 @@ public class ProductService : IProductService
         p.Id, p.NameEn, p.NameAr, p.Sku, p.DescriptionEn, p.DescriptionAr,
         p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).ToList(),
         p.InStock, p.IsVisible,
-        new BrandDto(p.Brand!.Id, p.Brand.NameEn, p.Brand.NameAr, p.Brand.Slug),
+        new BrandDto(p.Brand!.Id, p.Brand.NameEn, p.Brand.NameAr, p.Brand.Slug, p.Brand.ImageUrl),
         p.ProductCategories.Select(pc => new CategoryDto(pc.Category!.Id, pc.Category.NameEn, pc.Category.NameAr, pc.Category.Slug, pc.Category.ImageUrl)).ToList()
     );
 }

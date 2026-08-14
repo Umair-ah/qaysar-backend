@@ -10,7 +10,12 @@ namespace Qaysar.Api.Controllers;
 public class QuotationsController : ControllerBase
 {
     private readonly IQuotationService _svc;
-    public QuotationsController(IQuotationService svc) => _svc = svc;
+    private readonly IQuotationPdfService _pdfSvc;
+    public QuotationsController(IQuotationService svc, IQuotationPdfService pdfSvc)
+    {
+        _svc = svc;
+        _pdfSvc = pdfSvc;
+    }
 
     /// <summary>
     /// Public — submitted by customers from the "Request a Quotation" form.
@@ -70,5 +75,13 @@ public class QuotationsController : ControllerBase
     {
         var q = await _svc.UpdatePricesAsync(id, dto);
         return q is null ? NotFound() : Ok(q);
+    }
+
+    [Authorize]
+    [HttpGet("{id:int}/pdf")]
+    public async Task<IActionResult> GetPdf(int id)
+    {
+        var bytes = await _pdfSvc.GenerateAsync(id, HttpContext.RequestAborted);
+        return bytes is null ? NotFound() : File(bytes, "application/pdf", $"Quotation-{id:D5}.pdf");
     }
 }
