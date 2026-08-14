@@ -21,6 +21,9 @@ public class QuotationPdfService : IQuotationPdfService
     private const string CompanyEmail = "qaysaralmuaddat@gmail.com";
     private const string CompanyCr = "7052774036";
     private const string CompanyVat = "314448086500003";
+    private const string CompanyIban = "SA9345000000602083602001";
+    private const string BankNameEn = "Saudi Awwal Bank (SAB)";
+    private const string BankNameAr = "البنك السعودي الأول";
     private const string Currency = "SAR";
     private const int ValidityDays = 30;
     private const decimal VatRate = 0.15m;
@@ -33,6 +36,8 @@ public class QuotationPdfService : IQuotationPdfService
     private const string ColorWhite = "#FFFFFF";
 
     private static readonly string LogoPath = Path.Combine(AppContext.BaseDirectory, "Assets", "qaysar-logo.png");
+    // Drop a "sab-logo.png" into Assets/ to have the bank's logo render here — falls back to a text badge until then.
+    private static readonly string SabLogoPath = Path.Combine(AppContext.BaseDirectory, "Assets", "sab-logo.png");
 
     public async Task<byte[]?> GenerateAsync(int id, CancellationToken ct = default)
     {
@@ -61,6 +66,7 @@ public class QuotationPdfService : IQuotationPdfService
 
         var hasPendingPrices = items.Any(qp => qp.UnitPrice is null);
         var logoBytes = File.Exists(LogoPath) ? await File.ReadAllBytesAsync(LogoPath, ct) : null;
+        var sabLogoBytes = File.Exists(SabLogoPath) ? await File.ReadAllBytesAsync(SabLogoPath, ct) : null;
 
         var document = Document.Create(container =>
         {
@@ -71,7 +77,7 @@ public class QuotationPdfService : IQuotationPdfService
                 page.DefaultTextStyle(x => x.FontSize(10).FontColor(ColorInk));
 
                 page.Header().Element(c => ComposeHeader(c, logoBytes, quotation));
-                page.Content().Element(c => ComposeContent(c, quotation, lines, subtotalExclVat, vatAmount, grandTotal, hasPendingPrices));
+                page.Content().Element(c => ComposeContent(c, quotation, lines, subtotalExclVat, vatAmount, grandTotal, hasPendingPrices, sabLogoBytes));
                 page.Footer().Element(ComposeFooter);
             });
         });
@@ -137,7 +143,7 @@ public class QuotationPdfService : IQuotationPdfService
         });
     }
 
-    private static void ComposeContent(IContainer container, Quotation q, List<QuotationLine> lines, decimal subtotalExclVat, decimal vatAmount, decimal grandTotal, bool hasPendingPrices)
+    private static void ComposeContent(IContainer container, Quotation q, List<QuotationLine> lines, decimal subtotalExclVat, decimal vatAmount, decimal grandTotal, bool hasPendingPrices, byte[]? sabLogoBytes)
     {
         container.PaddingTop(18).Column(column =>
         {
@@ -179,6 +185,38 @@ public class QuotationPdfService : IQuotationPdfService
                     .FontSize(8).FontColor(ColorSand);
                 text.Span($"هذا العرض صالح لمدة {ValidityDays} يومًا من تاريخ الإصدار. جميع المبالغ بالريال السعودي وتشمل ضريبة القيمة المضافة (15٪) وفقًا لأنظمة هيئة الزكاة والضريبة والجمارك.")
                     .FontSize(8).FontColor(ColorSand);
+            });
+
+            column.Item().Element(c => ComposeBankDetails(c, sabLogoBytes));
+        });
+    }
+
+    private static void ComposeBankDetails(IContainer container, byte[]? sabLogoBytes)
+    {
+        container.Background(ColorCream).Padding(12).Row(row =>
+        {
+            row.ConstantItem(48).Height(32).AlignLeft().AlignMiddle().Element(c =>
+            {
+                if (sabLogoBytes is not null) c.Image(sabLogoBytes).FitArea();
+                else c.Background(ColorPlum).AlignMiddle().AlignCenter().Padding(4).Text("SAB").FontSize(11).Bold().FontColor(ColorWhite);
+            });
+
+            row.RelativeItem().PaddingLeft(12).Column(col =>
+            {
+                col.Item().Text(text =>
+                {
+                    text.Span("Bank Transfer / ").FontSize(9).Bold().FontColor(ColorSand);
+                    text.Span("تحويل بنكي").FontSize(9).Bold().FontColor(ColorSand);
+                });
+                col.Item().PaddingTop(2).Text(text =>
+                {
+                    text.Span($"{BankNameEn} / {BankNameAr}").FontSize(9).FontColor(ColorInk);
+                });
+                col.Item().PaddingTop(2).Text(text =>
+                {
+                    text.Span("IBAN: ").FontSize(10).Bold().FontColor(ColorPlum);
+                    text.Span(CompanyIban).FontSize(10).Bold().FontColor(ColorPlum);
+                });
             });
         });
     }
